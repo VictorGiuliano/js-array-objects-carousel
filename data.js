@@ -18,7 +18,7 @@ Aggiungere funzionalità di autoplay: dopo un certo periodo di tempo (3 secondi)
 alla successiva.
 BONUS 3:
 Aggiungere bottoni di start/stop  del meccanismo di autoplay.*/
-const data = [
+const sources = [
   {
     image: 'img/01.webp',
     title: 'Marvel\'s Spiderman Miles Morale',
@@ -41,48 +41,114 @@ const data = [
     text: 'Marvel\'s Avengers is an epic, third-person, action-adventure game that combines an original, cinematic story with single-player and co-operative gameplay.',
   }
 ];
-const sources = [
-  'img/01.webp',
-  "img/02.webp",
-  "img/03.webp",
-  "img/04.webp",
-  "img/05.webp",
-]
+
+function changePic(target){
+  galleryFigures[currentActiveIndex].classList.remove('active');
+  thumb[currentActiveIndex].classList.remove('active');
+
+  if(target === 'next'){
+    currentActiveIndex++;
+
+    if(currentActiveIndex === galleryFigures.length)currentActiveIndex = 0;
+  } else if(target === 'prev'){
+    currentActiveIndex--;
+
+    if(currentActiveIndex < 0) currentActiveIndex = galleryFigures.length -1;
+  }else{
+    currentActiveIndex = target;
+  }
+
+  galleryFigures[currentActiveIndex].classList.add('active');
+  thumb[currentActiveIndex].classList.add('active');
+
+}
+const startAutoplay = () => {
+  autoPlay = setInterval(() =>{
+    changePic('next');
+  },3000);
+}
+const stopAutoplay = () => {
+  clearInterval(autoPlay);
+  isPlaying = false;
+  autoplayButton.innerText = 'RESUME AUTOPLAY';
+}
 
 
 const prev = document.getElementById('prev');
 const next = document.getElementById('next');
-const gallery = document.querySelector('#carousel .gallery');
-const images = document.querySelectorAll('.gallery img');
+const autoplayButton = document .getElementById('autoplay-button');
 
+const gallery = document.querySelector('#carousel .gallery'); 
+const thumbGallery = document.getElementById('thumbnails');
+
+let galleryElement = '';
+let thumbElement = '';
+
+sources.forEach((source, i) => { 
+  const img = `<img src="${source.image} " alt = "">`;
+  thumbElement += img;
+  galleryElement += `
+  <figure>
+    ${img}
+    <figcaption>
+      <h2>${source.title}</h2>
+      <h3>${source.text}</h3>
+    </figcaption>
+  </figure> `;
+});
+
+
+
+gallery.innerHTML = galleryElement;
+thumbGallery.innerHTML = thumbElement;
+
+
+
+const galleryFigures = document.querySelectorAll('.gallery figure');
+const thumb = document.querySelectorAll('#thumbnails img');
 let currentActiveIndex = 0;
-images[currentActiveIndex].classList.add('active');
+galleryFigures[currentActiveIndex].classList.add('active');
+thumb[currentActiveIndex].classList.add('active');
 
-let imageElement = '';
-for(let i=0; i<sources.length;i++){
-imageElement +=  `<img src="${sources[i]} " alt = "">`;
-}
-gallery.innerHTML = imageElement;
+let autoPlay;
 
+startAutoplay();
+
+
+let isPlaying = true;
+
+
+autoplayButton.addEventListener('click',function(){
+  isPlaying = !isPlaying;
+
+  if(!isPlaying){
+    autoplayButton.innerText = 'RESUME AUTOPLAY';
+    clearInterval(autoPlay);
+  }else{
+    autoplayButton.innerText = 'SET AUTOPLAY';
+    startAutoplay();
+  }
+})
 
 next.addEventListener('click',function(){
-  images[currentActiveIndex].classList.remove('active');
-  currentActiveIndex++;
+  stopAutoplay();
+  changePic('next');
+});
 
-  if(currentActiveIndex === images.length){
-    currentActiveIndex = 0;
-  }
+prev.addEventListener('click',function(){ 
+  stopAutoplay();
+  changePic('prev');
+});
 
-  images[currentActiveIndex].classList.add('active');
+for(let i=0; i<thumb.length;i++){
+  const thum = thumb[i];
 
-})
+  thum.addEventListener('click', function(){
+    stopAutoplay();
+    changePic(i);
+  });
+}
 
-prev.addEventListener('click',function(){
-  images[currentActiveIndex].classList.remove('active');
-  currentActiveIndex--;
 
-  if(currentActiveIndex < 0) currentActiveIndex = images.length -1;
 
-  images[currentActiveIndex].classList.add('active');
-
-})
+ 
